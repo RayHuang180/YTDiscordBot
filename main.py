@@ -16,6 +16,7 @@ from discord import app_commands
 from discord.ext import commands
 
 import spotify
+from bilibili_compat import BiliBiliIE
 
 # ───────────────────────── 設定 ─────────────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -120,6 +121,10 @@ STREAM_YDL_OPTIONS = {
 class YDL(yt_dlp.YoutubeDL):
     """只讀取 cookies.txt、不寫回，避免同時查詢多首歌時互相覆寫造成檔案損壞"""
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.add_info_extractor(BiliBiliIE())
+
     def save_cookies(self):
         pass
 
@@ -145,6 +150,15 @@ BILIBILI_SEARCH_COUNT = 5  # B 站搜尋會混入課程等無法播放的結果�
 
 def is_bilibili(url):
     return bool(url and BILIBILI_RE.match(url))
+
+
+def normalize_query(query):
+    query = query.strip().strip("<>")
+    if re.match(r"^(?:[\w-]+\.)*(?:bilibili\.com|b23\.tv|bili2233\.cn)/", query, re.I):
+        return "https://" + query
+    if re.fullmatch(r"BV[A-Za-z0-9]{10}|av\d+", query):
+        return "https://www.bilibili.com/video/" + query
+    return query
 
 
 @dataclass(eq=False)
@@ -250,6 +264,7 @@ def extract(opts, target, retries=2):
 
 def get_songs(query, requester, site="youtube"):
     """搜尋關鍵字、單支影片或播放清單，回傳 (清單名稱或 None, [Song, ...])"""
+    query = normalize_query(query)
     is_url = query.startswith("http")
     opts = dict(FLAT_YDL_OPTIONS)
     if is_url:
@@ -934,7 +949,7 @@ async def enqueue(ctx, query, site="youtube"):
         return
     state = get_state(ctx.guild.id)
     state.text_channel = ctx.channel
-    query = query.strip().strip("<>")
+    query = normalize_query(query)
 
     loading = None
     if ctx.interaction is None:
