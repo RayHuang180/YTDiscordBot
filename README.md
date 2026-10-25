@@ -46,16 +46,23 @@ pip install -r requirements.txt
 沒有這個檔案機器人也能正常運作。cookies 會過期，播不了時記得重新匯出。
 機器人只會讀取這個檔案，不會改寫它。
 
-### 5. 設定 config.txt
+### 5. 設定 .env 與 config.txt
 
-把 `config.example.txt` 複製一份並改名為 `config.txt`，再填入你的設定
-（`config.txt` 含有 Token，已列在 `.gitignore`，不會被上傳到 GitHub）：
+把 `.env.example` 複製成 `.env`，填入 Discord Bot Token：
+
+```dotenv
+DISCORD_TOKEN=你的Discord Bot Token
+```
+
+`.env` 已列在 `.gitignore`，不會上傳到 GitHub。程式會讀取 `main.py` 同目錄的 `.env`；
+若系統已設定 `DISCORD_TOKEN` 環境變數，會優先使用環境變數。
+
+其他設定放在 `config.txt`（選填；未提供時使用預設值）：
 
 ```
 [DEFAULT]
 cookies_path = cookies.txt
 volume = 0.1
-token = 你的Discord Bot Token
 playlist = 20
 ffmpeg_path = ffmpeg-7.1-essentials_build/bin/ffmpeg.exe
 prefix = !
@@ -63,7 +70,6 @@ idle_timeout = 300
 ```
 - cookies_path：cookies.txt 路徑（檔案不存在時自動略過）
 - volume：預設音量（0.0 ~ 2.0）
-- token：Discord 機器人 Token
 - playlist：播放清單一次最多加入幾首（預設 20）
 - ffmpeg_path：ffmpeg 執行檔路徑
 - prefix：預設的前綴指令符號（選填，預設 `!`；各伺服器可用 `/prefix` 另外設定）

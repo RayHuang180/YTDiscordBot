@@ -1,5 +1,8 @@
 # 機密 / 個人設定（請勿上傳）
 config.txt
+.env
+.env.*
+!.env.example
 cookies.txt
 *.cookies.txt
 guild_settings.json

@@ -14,21 +14,23 @@ import discord
 import yt_dlp
 from discord import app_commands
 from discord.ext import commands
+from dotenv import load_dotenv
 
 import spotify
 from bilibili_compat import BiliBiliIE
 
 # ───────────────────────── 設定 ─────────────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(BASE_DIR, ".env"))
 config = configparser.ConfigParser()
 files = config.read(os.path.join(BASE_DIR, "config.txt"), encoding="utf-8")
 print("已讀取的檔案：", files)
-if not files or not config["DEFAULT"].get("token"):
-    raise SystemExit("❌ 找不到 config.txt 或沒有填 token：請把 config.example.txt 複製成 config.txt 並填入 Bot Token")
+token = os.getenv("DISCORD_TOKEN", "").strip()
+if not token:
+    raise SystemExit("❌ 未設定 DISCORD_TOKEN：請把 .env.example 複製成 .env 並填入 Discord Bot Token")
 
 cookies_path = config["DEFAULT"].get("cookies_path", "cookies.txt")
 default_volume = float(config["DEFAULT"].get("volume", "0.1"))
-token = config["DEFAULT"]["token"]
 playlist = int(config["DEFAULT"].get("playlist", "20"))
 ffmpeg_path = config["DEFAULT"].get("ffmpeg_path", "ffmpeg")
 default_prefix = config["DEFAULT"].get("prefix", "!")
